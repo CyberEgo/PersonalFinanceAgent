@@ -1,11 +1,11 @@
 # PersonalFinance - AI-Powered Personal Finance Assistant
 
-An intelligent personal finance assistant built with .NET Aspire, Semantic Kernel agents, and a modern React frontend.
+An intelligent personal finance assistant built with .NET Aspire, Microsoft Agent Framework, and a modern React frontend.
 
 ## Architecture
 
 - **PersonalFinance.AppHost** - .NET Aspire orchestrator managing all services
-- **PersonalFinance.AgentBackend** - Multi-agent AI backend using Semantic Kernel
+- **PersonalFinance.AgentBackend** - Multi-agent AI backend using Microsoft Agent Framework
 - **PersonalFinance.AccountApi** - Account management microservice with MCP tools
 - **PersonalFinance.TransactionApi** - Transaction history microservice with MCP tools
 - **PersonalFinance.PaymentApi** - Payment processing microservice with MCP tools
@@ -31,7 +31,8 @@ The backend uses a **triage + specialist** multi-agent pattern rather than a sin
 ## Tech Stack
 
 - .NET 10 + Aspire 13.1
-- Semantic Kernel (agents, tool calling)
+- Microsoft Agent Framework (multi-agent handoff workflows, tool calling)
+- Microsoft.Extensions.AI (IChatClient abstraction)
 - Azure OpenAI (GPT-4.1)
 - Model Context Protocol (MCP)
 - Azure Document Intelligence
@@ -78,9 +79,9 @@ personal-finance-agent/
 │   ├── PersonalFinance.ServiceDefaults/  # Shared Aspire config
 │   ├── PersonalFinance.Common/           # Shared models
 │   ├── PersonalFinance.AgentBackend/     # AI agent backend
-│   │   ├── Agents/                    # Agent definitions
-│   │   ├── Tools/                     # SK plugins (account, transaction, payment, invoice)
-│   │   ├── Services/                  # Chat orchestration
+│   │   ├── Agents/                    # Agent definitions & handoff workflow
+│   │   ├── Tools/                     # AI tool plugins (account, transaction, payment, invoice)
+│   │   ├── Services/                  # Chat orchestration & payment event broadcasting
 │   │   └── Hubs/                      # SSE streaming endpoints
 │   ├── PersonalFinance.AccountApi/       # Account microservice
 │   ├── PersonalFinance.TransactionApi/   # Transaction microservice
