@@ -1,0 +1,6 @@
+@PersonalFinance.AgentBackend_HostAddress = http://localhost:5081
+
+GET {{PersonalFinance.AgentBackend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

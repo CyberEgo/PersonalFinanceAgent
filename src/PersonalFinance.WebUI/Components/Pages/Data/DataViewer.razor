@@ -1,0 +1,271 @@
+@page "/data"
+@page "/data/{TableName}"
+@using Microsoft.EntityFrameworkCore
+@using PersonalFinance.Common.Data
+@using PersonalFinance.Common.Data.Entities
+@inject PersonalFinanceDbContext Db
+
+<PageTitle>Data Viewer - Personal Finance</PageTitle>
+
+<div class="data-viewer">
+    <div class="data-header">
+        <h1>Data Viewer</h1>
+        <p class="data-subtitle">Browse the database tables to verify AI assistant responses.</p>
+    </div>
+
+    <div class="table-tabs">
+        @foreach (var tab in tables)
+        {
+            <a href="/data/@tab.Key"
+               class="tab @(string.Equals(activeTable, tab.Key, StringComparison.OrdinalIgnoreCase) ? "tab-active" : "")">
+                <span class="tab-label">@tab.Value.Label</span>
+                <span class="tab-badge">@tab.Value.Count</span>
+            </a>
+        }
+    </div>
+
+    <div class="table-card">
+        @if (activeTable == "accounts")
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Holder Name</th>
+                        <th>Currency</th>
+                        <th class="col-right">Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in accounts)
+                    {
+                        <tr>
+                            <td class="cell-mono">@a.Id</td>
+                            <td>@a.UserName</td>
+                            <td>@a.AccountHolderFullName</td>
+                            <td>@a.Currency</td>
+                            <td class="col-right">@a.Balance.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else if (activeTable == "transactions")
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Account</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>Flow</th>
+                        <th>Recipient</th>
+                        <th class="col-right">Amount</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in transactions)
+                    {
+                        <tr>
+                            <td class="cell-mono">@t.Id</td>
+                            <td class="cell-mono">@t.AccountId</td>
+                            <td>@t.Description</td>
+                            <td><span class="badge">@t.Type</span></td>
+                            <td><span class="badge @(t.FlowType == "income" ? "badge-green" : "badge-red")">@t.FlowType</span></td>
+                            <td>@t.RecipientName</td>
+                            <td class="col-right">@t.Amount.ToString("N2")</td>
+                            <td class="cell-nowrap">@t.Timestamp.ToString("yyyy-MM-dd")</td>
+                            <td><span class="badge">@t.Category</span></td>
+                            <td><span class="badge badge-blue">@t.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else if (activeTable == "payments")
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Account</th>
+                        <th>Recipient</th>
+                        <th>Type</th>
+                        <th class="col-right">Amount</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in payments)
+                    {
+                        <tr>
+                            <td class="cell-mono">@p.Id</td>
+                            <td class="cell-mono">@p.AccountId</td>
+                            <td>@p.RecipientName</td>
+                            <td><span class="badge">@p.PaymentType</span></td>
+                            <td class="col-right">@p.Amount.ToString("N2")</td>
+                            <td class="cell-nowrap">@p.Timestamp.ToString("yyyy-MM-dd")</td>
+                            <td><span class="badge">@p.Category</span></td>
+                            <td><span class="badge badge-blue">@p.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else if (activeTable == "cards")
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Account</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Number</th>
+                        <th class="col-right">Balance</th>
+                        <th class="col-right">Limit</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in cards)
+                    {
+                        <tr>
+                            <td class="cell-mono">@c.Id</td>
+                            <td class="cell-mono">@c.AccountId</td>
+                            <td>@c.Name</td>
+                            <td><span class="badge">@c.Type</span></td>
+                            <td class="cell-mono">@c.Number</td>
+                            <td class="col-right">@c.Balance.ToString("N2")</td>
+                            <td class="col-right">@c.Limit.ToString("N2")</td>
+                            <td><span class="badge badge-green">@c.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else if (activeTable == "beneficiaries")
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Account</th>
+                        <th>Full Name</th>
+                        <th>Bank Code</th>
+                        <th>Bank Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in beneficiaries)
+                    {
+                        <tr>
+                            <td class="cell-mono">@b.Id</td>
+                            <td class="cell-mono">@b.AccountId</td>
+                            <td>@b.FullName</td>
+                            <td class="cell-mono">@b.BankCode</td>
+                            <td>@b.BankName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else if (activeTable == "paymentmethods")
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Account</th>
+                        <th>Type</th>
+                        <th class="col-right">Available Balance</th>
+                        <th>Card Number</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var pm in paymentMethods)
+                    {
+                        <tr>
+                            <td class="cell-mono">@pm.Id</td>
+                            <td class="cell-mono">@pm.AccountId</td>
+                            <td><span class="badge">@pm.Type</span></td>
+                            <td class="col-right">@pm.AvailableBalance.ToString("N2")</td>
+                            <td class="cell-mono">@(pm.CardNumber ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string? TableName { get; set; }
+
+    private string activeTable = "accounts";
+
+    private record TableInfo(string Label, int Count);
+    private Dictionary<string, TableInfo> tables = new();
+
+    private List<AccountEntity> accounts = [];
+    private List<TransactionEntity> transactions = [];
+    private List<PaymentEntity> payments = [];
+    private List<CardEntity> cards = [];
+    private List<BeneficiaryEntity> beneficiaries = [];
+    private List<PaymentMethodEntity> paymentMethods = [];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        activeTable = string.IsNullOrEmpty(TableName) ? "accounts" : TableName.ToLowerInvariant();
+
+        var counts = new Dictionary<string, int>
+        {
+            ["accounts"] = await Db.Accounts.CountAsync(),
+            ["transactions"] = await Db.Transactions.CountAsync(),
+            ["payments"] = await Db.Payments.CountAsync(),
+            ["cards"] = await Db.Cards.CountAsync(),
+            ["beneficiaries"] = await Db.Beneficiaries.CountAsync(),
+            ["paymentmethods"] = await Db.PaymentMethods.CountAsync(),
+        };
+
+        tables = new()
+        {
+            ["accounts"] = new("Accounts", counts["accounts"]),
+            ["transactions"] = new("Transactions", counts["transactions"]),
+            ["payments"] = new("Payments", counts["payments"]),
+            ["cards"] = new("Cards", counts["cards"]),
+            ["beneficiaries"] = new("Beneficiaries", counts["beneficiaries"]),
+            ["paymentmethods"] = new("Payment Methods", counts["paymentmethods"]),
+        };
+
+        switch (activeTable)
+        {
+            case "accounts":
+                accounts = await Db.Accounts.AsNoTracking().ToListAsync();
+                break;
+            case "transactions":
+                transactions = await Db.Transactions.AsNoTracking().OrderByDescending(t => t.Timestamp).ToListAsync();
+                break;
+            case "payments":
+                payments = await Db.Payments.AsNoTracking().OrderByDescending(p => p.Timestamp).ToListAsync();
+                break;
+            case "cards":
+                cards = await Db.Cards.AsNoTracking().ToListAsync();
+                break;
+            case "beneficiaries":
+                beneficiaries = await Db.Beneficiaries.AsNoTracking().ToListAsync();
+                break;
+            case "paymentmethods":
+                paymentMethods = await Db.PaymentMethods.AsNoTracking().ToListAsync();
+                break;
+        }
+    }
+}

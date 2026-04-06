@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "marked@15.0.7",
+      "destination": "wwwroot/lib/marked/dist/",
+      "files": [
+        "marked.esm.js"
+      ]
+    },
+    {
+      "library": "dompurify@3.2.5",
+      "destination": "wwwroot/lib/dompurify/dist/",
+      "files": [
+        "purify.es.mjs"
+      ]
+    }
+  ]
+}

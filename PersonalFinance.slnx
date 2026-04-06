@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PersonalFinance.AccountApi/PersonalFinance.AccountApi.csproj" />
+    <Project Path="src/PersonalFinance.AgentBackend/PersonalFinance.AgentBackend.csproj" />
+    <Project Path="src/PersonalFinance.AppHost/PersonalFinance.AppHost.csproj" />
+    <Project Path="src/PersonalFinance.Common/PersonalFinance.Common.csproj" />
+    <Project Path="src/PersonalFinance.PaymentApi/PersonalFinance.PaymentApi.csproj" />
+    <Project Path="src/PersonalFinance.ServiceDefaults/PersonalFinance.ServiceDefaults.csproj" />
+    <Project Path="src/PersonalFinance.TransactionApi/PersonalFinance.TransactionApi.csproj" />
+  </Folder>
+</Solution>

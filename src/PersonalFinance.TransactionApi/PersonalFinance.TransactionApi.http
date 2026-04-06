@@ -1,0 +1,6 @@
+@PersonalFinance.TransactionApi_HostAddress = http://localhost:5155
+
+GET {{PersonalFinance.TransactionApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

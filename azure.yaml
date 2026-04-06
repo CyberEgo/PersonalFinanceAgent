@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: personal-finance-agent
+metadata:
+  template: personal-finance-agent@0.1.0
+
+infra:
+  provider: bicep
+  path: infra
+
+hooks:
+  postprovision:
+    shell: pwsh
+    run: infra/hooks/postprovision.ps1
+
+services:
+  accountapi:
+    project: src/PersonalFinance.AccountApi/PersonalFinance.AccountApi.csproj
+    host: containerapp
+    language: dotnet
+    docker:
+      path: src/PersonalFinance.AccountApi/Dockerfile
+      context: src
+
+  transactionapi:
+    project: src/PersonalFinance.TransactionApi/PersonalFinance.TransactionApi.csproj
+    host: containerapp
+    language: dotnet
+    docker:
+      path: src/PersonalFinance.TransactionApi/Dockerfile
+      context: src
+
+  paymentapi:
+    project: src/PersonalFinance.PaymentApi/PersonalFinance.PaymentApi.csproj
+    host: containerapp
+    language: dotnet
+    docker:
+      path: src/PersonalFinance.PaymentApi/Dockerfile
+      context: src
+
+  agentbackend:
+    project: src/PersonalFinance.AgentBackend/PersonalFinance.AgentBackend.csproj
+    host: containerapp
+    language: dotnet
+    docker:
+      path: src/PersonalFinance.AgentBackend/Dockerfile
+      context: src
+
+  frontend:
+    project: src/PersonalFinance.Frontend
+    host: containerapp
+    language: js
+    docker:
+      path: Dockerfile
+      context: .

@@ -1,0 +1,23 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.2.1">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>394ac294-f1c5-4d0d-944f-9a13e521c9ef</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.2.1" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PersonalFinance.AgentBackend\PersonalFinance.AgentBackend.csproj" />
+    <ProjectReference Include="..\PersonalFinance.AccountApi\PersonalFinance.AccountApi.csproj" />
+    <ProjectReference Include="..\PersonalFinance.TransactionApi\PersonalFinance.TransactionApi.csproj" />
+    <ProjectReference Include="..\PersonalFinance.PaymentApi\PersonalFinance.PaymentApi.csproj" />
+  </ItemGroup>
+
+</Project>

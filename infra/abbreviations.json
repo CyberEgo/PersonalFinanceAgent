@@ -1,0 +1,10 @@
+{
+  "cognitiveServicesAccounts": "cog-",
+  "containerRegistries": "cr",
+  "containerAppsEnvironments": "cae-",
+  "containerApps": "ca-",
+  "logAnalyticsWorkspaces": "log-",
+  "openAiAccounts": "oai-",
+  "sqlServers": "sql-",
+  "staticWebApps": "swa-"
+}

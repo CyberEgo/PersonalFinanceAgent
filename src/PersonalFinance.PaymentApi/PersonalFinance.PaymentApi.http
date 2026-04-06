@@ -1,0 +1,6 @@
+@PersonalFinance.PaymentApi_HostAddress = http://localhost:5191
+
+GET {{PersonalFinance.PaymentApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

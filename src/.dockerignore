@@ -1,0 +1,17 @@
+**/.git
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/.env
+**/wwwroot
+**/Properties/launchSettings.json
+tests/
+infra/
+data/
+*.md
+*.slnx
+azure.yaml
+aspire.config.json

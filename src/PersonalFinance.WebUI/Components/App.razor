@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["PersonalFinance.WebUI.styles.css"]" />
+    <ImportMap />
+    <HeadOutlet @rendermode="@renderMode" />
+</head>
+
+<body>
+    <script>
+        // Theme: apply before render to prevent flash
+        (function() {
+            var d = localStorage.getItem('theme') === 'dark';
+            if (d) document.documentElement.classList.add('dark');
+            window.__getTheme = function() { return document.documentElement.classList.contains('dark'); };
+            window.__setTheme = function(dark) {
+                if (dark) { document.documentElement.classList.add('dark'); localStorage.setItem('theme','dark'); }
+                else { document.documentElement.classList.remove('dark'); localStorage.setItem('theme','light'); }
+            };
+        })();
+    </script>
+    <Routes @rendermode="@renderMode" />
+    <script src="@Assets["upload-helpers.js"]"></script>
+    <script src="@Assets["app.js"]" type="module"></script>
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>
+
+@code {
+    private readonly IComponentRenderMode renderMode = new InteractiveServerRenderMode(prerender: false);
+}
