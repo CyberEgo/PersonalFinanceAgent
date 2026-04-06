@@ -69,6 +69,60 @@ dotnet user-secrets set "AzureOpenAI:ApiKey" "your-key"
 
 Or use DefaultAzureCredential by leaving ApiKey empty.
 
+### Deploy to Azure
+
+The project includes full Infrastructure as Code (Bicep) and is ready to deploy with the [Azure Developer CLI (`azd`)](https://learn.microsoft.com/azure/developer/azure-developer-cli/overview).
+
+#### Prerequisites
+
+- [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd) installed
+- An Azure subscription
+
+#### Provision and Deploy
+
+```bash
+# Provision infrastructure and deploy all services in one step
+azd up
+```
+
+This will:
+1. Prompt you for a subscription, location, and environment name
+2. Provision all Azure resources (Container Apps, Azure SQL, Azure OpenAI, Container Registry, Log Analytics, etc.)
+3. Build Docker images for all 5 services
+4. Deploy them to Azure Container Apps
+
+#### Deploy Individual Services
+
+After the initial `azd up`, you can redeploy individual services without re-provisioning:
+
+```bash
+azd deploy agentbackend   # AI agent backend
+azd deploy frontend       # React frontend
+azd deploy accountapi     # Account API
+azd deploy transactionapi # Transaction API
+azd deploy paymentapi     # Payment API
+```
+
+#### Other Useful Commands
+
+```bash
+azd env list              # List environments
+azd env get-values        # Show all environment variables
+azd monitor               # Open Azure Monitor dashboard
+azd down                  # Tear down all Azure resources
+```
+
+#### Azure Resources Provisioned
+
+| Resource | Purpose |
+|----------|---------|
+| Azure Container Apps Environment | Hosts all 5 microservices |
+| Azure Container Registry | Stores Docker images |
+| Azure SQL Database | Account, transaction, and payment data |
+| Azure OpenAI | GPT-4.1 for agent reasoning |
+| Azure AI Services | Document Intelligence for invoice scanning |
+| Log Analytics Workspace | Centralized logging and monitoring |
+
 ## Project Structure
 
 ```
