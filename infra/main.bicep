@@ -61,12 +61,12 @@ module documentIntelligence './modules/cognitive-services.bicep' = {
   }
 }
 
-// Azure OpenAI
-module openAi './modules/openai.bicep' = {
-  name: 'openai'
+// Azure AI Foundry (Hub + Project + AI Services)
+module aiFoundry './modules/ai-foundry.bicep' = {
+  name: 'ai-foundry'
   scope: rg
   params: {
-    name: '${abbrs.openAiAccounts}${resourceToken}'
+    name: '${abbrs.aiFoundry}${resourceToken}'
     location: openAiLocation
     tags: tags
     deploymentName: openAiDeploymentName
@@ -200,7 +200,7 @@ module agentBackend './modules/container-app.bicep' = {
     env: [
       { name: 'DocumentIntelligence__Endpoint', value: documentIntelligence.outputs.endpoint }
       { name: 'DocumentIntelligence__ApiKey', secretRef: 'di-api-key' }
-      { name: 'AzureOpenAI__Endpoint', value: openAi.outputs.endpoint }
+      { name: 'AzureOpenAI__Endpoint', value: aiFoundry.outputs.aiServicesEndpoint }
       { name: 'AzureOpenAI__ApiKey', secretRef: 'openai-api-key' }
       { name: 'AzureOpenAI__DeploymentName', value: openAiDeploymentName }
       { name: 'services__accountapi__https__0', value: 'https://${accountApi.outputs.fqdn}' }
@@ -209,7 +209,7 @@ module agentBackend './modules/container-app.bicep' = {
     ]
     secrets: [
       { name: 'di-api-key', value: documentIntelligence.outputs.key }
-      { name: 'openai-api-key', value: openAi.outputs.key }
+      { name: 'openai-api-key', value: aiFoundry.outputs.aiServicesKey }
     ]
   }
 }
@@ -239,7 +239,9 @@ output DOCUMENT_INTELLIGENCE_RESOURCE_GROUP string = rg.name
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerRegistry.outputs.loginServer
 output AZURE_CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
 output AZURE_CONTAINER_APPS_ENVIRONMENT_ID string = containerAppsEnvironment.outputs.id
-output AZURE_OPENAI_ENDPOINT string = openAi.outputs.endpoint
-output AZURE_OPENAI_DEPLOYMENT_NAME string = openAi.outputs.deploymentName
+output AZURE_OPENAI_ENDPOINT string = aiFoundry.outputs.aiServicesEndpoint
+output AZURE_OPENAI_DEPLOYMENT_NAME string = aiFoundry.outputs.deploymentName
+output AI_FOUNDRY_HUB_ID string = aiFoundry.outputs.aiHubId
+output AI_FOUNDRY_PROJECT_ID string = aiFoundry.outputs.aiProjectId
 output SQL_SERVER_FQDN string = sqlServer.outputs.fqdn
 output FRONTEND_FQDN string = frontend.outputs.fqdn

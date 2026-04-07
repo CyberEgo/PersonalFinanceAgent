@@ -1,4 +1,5 @@
 {
+  "aiFoundry": "aif-",
   "cognitiveServicesAccounts": "cog-",
   "containerRegistries": "cr",
   "containerAppsEnvironments": "cae-",
