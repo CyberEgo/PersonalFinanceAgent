@@ -55,8 +55,11 @@ The backend uses a **triage + specialist** multi-agent pattern rather than a sin
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or later
 - [Node.js 20+](https://nodejs.org/)
-- [Azure Developer CLI (`azd`)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd)
-- [Azure Subscription](https://azure.microsoft.com/free)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Aspire runs SQL Server in a container)
+- [Azure Developer CLI (`azd`)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd) (for deployment only)
+- An Azure subscription with these resources provisioned:
+  - **Azure OpenAI** — with a `gpt-4.1` (or compatible) model deployment
+  - **Azure Document Intelligence** — for invoice/receipt scanning
 
 ### 2. Clone Repository
 
@@ -65,18 +68,24 @@ git clone https://github.com/CyberEgo/PersonalFinanceAgent.git
 cd PersonalFinanceAgent
 ```
 
-### 3. Configure Azure OpenAI
+### 3. Configure Services
 
-Set your Azure OpenAI credentials via user secrets:
+All external-service credentials are stored as **user secrets** on the **AppHost** project. Aspire injects them as environment variables into the services that need them.
 
 ```bash
-cd src/PersonalFinance.AgentBackend
-dotnet user-secrets set "AzureOpenAI:Endpoint" "https://your-resource.openai.azure.com/"
-dotnet user-secrets set "AzureOpenAI:DeploymentName" "gpt-4.1"
-dotnet user-secrets set "AzureOpenAI:ApiKey" "your-key"
+cd src/PersonalFinance.AppHost
+
+# Azure OpenAI
+dotnet user-secrets set "Parameters:AzureOpenAIEndpoint"       "https://your-resource.openai.azure.com/"
+dotnet user-secrets set "Parameters:AzureOpenAIDeploymentName"  "gpt-4.1"
+dotnet user-secrets set "Parameters:AzureOpenAIApiKey"          "your-openai-key"
+
+# Azure Document Intelligence
+dotnet user-secrets set "Parameters:DocumentIntelligenceEndpoint" "https://your-resource.cognitiveservices.azure.com/"
+dotnet user-secrets set "Parameters:DocumentIntelligenceApiKey"   "your-di-key"
 ```
 
-Or use `DefaultAzureCredential` by leaving `ApiKey` empty.
+> **Tip:** Leave `AzureOpenAIApiKey` empty to use `DefaultAzureCredential` instead (requires an Azure login via `az login`).
 
 ### 4. Run Locally
 
@@ -89,10 +98,11 @@ dotnet run
 
 **What happens next:**
 
-1. Open Aspire Dashboard (URL shown in terminal output)
-2. All services start (AgentBackend, AccountApi, TransactionApi, PaymentApi, Frontend)
-3. Look for ✅ "Running" status on all resources
-4. Click the **frontend** endpoint to open the app
+1. Docker starts a SQL Server container automatically (no manual setup needed)
+2. Open the Aspire Dashboard (URL shown in terminal output)
+3. All services start (AgentBackend, AccountApi, TransactionApi, PaymentApi, Frontend)
+4. Look for ✅ "Running" status on all resources
+5. Click the **frontend** endpoint to open the app
 
 ### 5. Deploy to Azure
 

@@ -148,20 +148,16 @@ public sealed class ChatOrchestrationService
         List<ChatMessage> history,
         CancellationToken cancellationToken)
     {
-        // If we already have an active specialist, keep routing there
-        if (_activeAgents.TryGetValue(threadId, out var activeAgent) && activeAgent != "TriageAgent")
-        {
-            return activeAgent;
-        }
-
-        // Use chat client to classify the request
+        // Always re-classify the latest user message so that cross-domain
+        // requests (e.g. "scan this invoice" while in TransactionHistory)
+        // are routed to the correct specialist.
         var classificationMessages = new List<ChatMessage>
         {
             new(ChatRole.System, """
                 Classify the user's banking request into exactly one category. Respond with ONLY the category name:
                 - AccountAgent: account balance, payment methods, cards, beneficiaries
                 - TransactionHistoryAgent: transaction history, movements, payment history
-                - PaymentAgent: make a payment, upload invoice/bill, process payment
+                - PaymentAgent: make a payment, upload invoice/bill, scan invoice, process payment, file/image uploads
                 - TriageAgent: unclear or unrelated
                 """)
         };

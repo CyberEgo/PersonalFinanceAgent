@@ -91,8 +91,11 @@ public sealed class PersonalFinanceAgentFactory
             AIFunctionFactory.Create(accountPlugin.GetAccountsByUserNameAsync),
             AIFunctionFactory.Create(accountPlugin.GetAccountDetailsAsync),
             AIFunctionFactory.Create(accountPlugin.GetRegisteredBeneficiariesAsync),
+            AIFunctionFactory.Create(accountPlugin.GetCreditCardsAsync),
+            AIFunctionFactory.Create(accountPlugin.GetCardDetailsAsync),
             AIFunctionFactory.Create(transactionPlugin.GetLastTransactionsAsync),
             AIFunctionFactory.Create(paymentPlugin.ProcessPaymentAsync),
+            AIFunctionFactory.Create(paymentPlugin.CheckInvoiceStatusAsync),
             AIFunctionFactory.Create(invoiceScanner.ScanInvoiceAsync),
         };
 

@@ -4,6 +4,11 @@ var builder = DistributedApplication.CreateBuilder(args);
 var sql = builder.AddSqlServer("sql")
     .AddDatabase("personalfinancedb");
 
+// Azure OpenAI configuration (provided via user-secrets locally, or azd env for cloud)
+var aoaiEndpoint = builder.AddParameter("AzureOpenAIEndpoint", secret: false);
+var aoaiDeployment = builder.AddParameter("AzureOpenAIDeploymentName", secret: false);
+var aoaiApiKey = builder.AddParameter("AzureOpenAIApiKey", secret: true);
+
 // Document Intelligence configuration (provided via user-secrets locally, or azd env for cloud)
 var diEndpoint = builder.AddParameter("DocumentIntelligenceEndpoint", secret: false);
 var diApiKey = builder.AddParameter("DocumentIntelligenceApiKey", secret: true);
@@ -29,6 +34,11 @@ var agentBackend = builder.AddProject<Projects.PersonalFinance_AgentBackend>("ag
     .WithReference(accountApi)
     .WithReference(transactionApi)
     .WithReference(paymentApi)
+    .WithReference(sql)
+    .WaitFor(sql)
+    .WithEnvironment("AzureOpenAI__Endpoint", aoaiEndpoint)
+    .WithEnvironment("AzureOpenAI__DeploymentName", aoaiDeployment)
+    .WithEnvironment("AzureOpenAI__ApiKey", aoaiApiKey)
     .WithEnvironment("DocumentIntelligence__Endpoint", diEndpoint)
     .WithEnvironment("DocumentIntelligence__ApiKey", diApiKey)
     .WithExternalHttpEndpoints()

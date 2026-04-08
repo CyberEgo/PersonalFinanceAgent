@@ -17,7 +17,7 @@ public sealed class PaymentPlugin
         _broadcaster = broadcaster;
     }
 
-    [Description("Process and submit a payment. Requires account_id, amount, description, recipient_name, payment_type (BankTransfer, CreditCard, DirectDebit). Optionally card_id, recipient_bank_code, category. This tool is idempotent — calling it multiple times with the same details will NOT create duplicate payments.")]
+    [Description("Process and submit a payment. Requires account_id, amount, description, recipient_name, payment_type (BankTransfer, CreditCard, DirectDebit). Optionally card_id, recipient_bank_code, category, invoice_id. This tool is idempotent — calling it multiple times with the same details will NOT create duplicate payments.")]
     public async Task<string> ProcessPaymentAsync(
         [Description("The account ID to pay from")] string accountId,
         [Description("Payment amount")] decimal amount,
@@ -26,7 +26,8 @@ public sealed class PaymentPlugin
         [Description("Payment type: BankTransfer, CreditCard, or DirectDebit")] string paymentType,
         [Description("Recipient bank code (required for BankTransfer)")] string? recipientBankCode = null,
         [Description("Card ID (required for CreditCard payments)")] string? cardId = null,
-        [Description("Payment category")] string? category = null)
+        [Description("Payment category")] string? category = null,
+        [Description("Invoice ID from the scanned invoice, if applicable")] string? invoiceId = null)
     {
         // Generate a deterministic idempotency key from the payment details
         // so that identical tool calls produce the same key and are deduplicated.
@@ -43,14 +44,18 @@ public sealed class PaymentPlugin
             CardId = cardId,
             Category = category,
             Status = "pending",
-            IdempotencyKey = idempotencyKey
+            IdempotencyKey = idempotencyKey,
+            InvoiceId = invoiceId
         };
 
         var json = JsonSerializer.Serialize(payload);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync("/api/payments/process", content);
-        response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            return $"Payment failed (HTTP {(int)response.StatusCode}): {result}";
+        }
 
         // Notify any connected SSE clients that dashboard data has changed
         _broadcaster.NotifyPaymentCompleted(accountId);
@@ -63,5 +68,17 @@ public sealed class PaymentPlugin
         var raw = $"{accountId}|{amount}|{description}|{recipientName}|{paymentType}";
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(raw));
         return Convert.ToHexStringLower(hash)[..32];
+    }
+
+    [Description("Check if an invoice has already been paid. Returns the existing payment details if found, or a message indicating the invoice has not been paid yet. Always call this BEFORE processing a payment for a scanned invoice.")]
+    public async Task<string> CheckInvoiceStatusAsync(
+        [Description("The invoice ID to check")] string invoiceId)
+    {
+        var response = await _httpClient.GetAsync($"/api/payments/invoice/{Uri.EscapeDataString(invoiceId)}");
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            return $"Invoice {invoiceId} has not been paid yet.";
+
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsStringAsync();
     }
 }

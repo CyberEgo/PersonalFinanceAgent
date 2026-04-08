@@ -8,7 +8,7 @@ namespace PersonalFinance.PaymentApi;
 [McpServerToolType]
 public sealed class PaymentTools(IPaymentService paymentService)
 {
-    [McpServerTool, Description("Process a payment. Requires account_id, amount, description, recipient_name, payment_type (BankTransfer, CreditCard, DirectDebit), and optionally card_id, recipient_bank_code, category, status, idempotency_key. This tool is idempotent — calling it multiple times with the same details will NOT create duplicate payments.")]
+    [McpServerTool, Description("Process a payment. Requires account_id, amount, description, recipient_name, payment_type (BankTransfer, CreditCard, DirectDebit), and optionally card_id, recipient_bank_code, category, status, idempotency_key, invoice_id. This tool is idempotent — calling it multiple times with the same details will NOT create duplicate payments.")]
     public async Task<object> ProcessPayment(
         string accountId,
         decimal amount,
@@ -19,7 +19,8 @@ public sealed class PaymentTools(IPaymentService paymentService)
         string? cardId = null,
         string? category = null,
         string status = "pending",
-        string? idempotencyKey = null)
+        string? idempotencyKey = null,
+        string? invoiceId = null)
     {
         var request = new PaymentRequest(
             AccountId: accountId,
@@ -31,8 +32,15 @@ public sealed class PaymentTools(IPaymentService paymentService)
             CardId: cardId,
             Category: category,
             Status: status,
-            IdempotencyKey: idempotencyKey);
+            IdempotencyKey: idempotencyKey,
+            InvoiceId: invoiceId);
 
         return await paymentService.ProcessPaymentAsync(request);
+    }
+
+    [McpServerTool, Description("Check if an invoice has already been paid. Returns the existing payment details if a payment with this invoice ID exists, or null if the invoice has not been paid yet.")]
+    public async Task<object?> CheckInvoiceStatus(string invoiceId)
+    {
+        return await paymentService.GetPaymentByInvoiceIdAsync(invoiceId);
     }
 }

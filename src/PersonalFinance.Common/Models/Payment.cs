@@ -11,7 +11,8 @@ public record Payment(
     string PaymentType,
     string? CardId,
     string? Category,
-    string Status);
+    string Status,
+    string? InvoiceId = null);
 
 public record PaymentRequest(
     string AccountId,
@@ -23,4 +24,5 @@ public record PaymentRequest(
     string? CardId,
     string? Category,
     string Status,
-    string? IdempotencyKey = null);
+    string? IdempotencyKey = null,
+    string? InvoiceId = null);

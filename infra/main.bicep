@@ -123,6 +123,15 @@ module containerAppsEnvironment './modules/container-apps-environment.bicep' = {
   }
 }
 
+// Aspire Dashboard (managed .NET component for observability)
+module aspireDashboard './modules/aspire-dashboard.bicep' = {
+  name: 'aspire-dashboard'
+  scope: rg
+  params: {
+    containerAppsEnvironmentName: containerAppsEnvironment.outputs.name
+  }
+}
+
 // Account API Container App
 module accountApi './modules/container-app.bicep' = {
   name: 'account-api'
@@ -137,6 +146,7 @@ module accountApi './modules/container-app.bicep' = {
     external: false
     env: [
       { name: 'ConnectionStrings__personalfinancedb', secretRef: 'sql-connection-string' }
+      { name: 'OTEL_EXPORTER_OTLP_ENDPOINT', value: 'http://aspire-dashboard:18889' }
     ]
     secrets: [
       { name: 'sql-connection-string', value: sqlServer.outputs.connectionString }
@@ -158,6 +168,7 @@ module transactionApi './modules/container-app.bicep' = {
     external: false
     env: [
       { name: 'ConnectionStrings__personalfinancedb', secretRef: 'sql-connection-string' }
+      { name: 'OTEL_EXPORTER_OTLP_ENDPOINT', value: 'http://aspire-dashboard:18889' }
     ]
     secrets: [
       { name: 'sql-connection-string', value: sqlServer.outputs.connectionString }
@@ -179,6 +190,7 @@ module paymentApi './modules/container-app.bicep' = {
     external: false
     env: [
       { name: 'ConnectionStrings__personalfinancedb', secretRef: 'sql-connection-string' }
+      { name: 'OTEL_EXPORTER_OTLP_ENDPOINT', value: 'http://aspire-dashboard:18889' }
     ]
     secrets: [
       { name: 'sql-connection-string', value: sqlServer.outputs.connectionString }
@@ -198,6 +210,7 @@ module agentBackend './modules/container-app.bicep' = {
     containerRegistryName: containerRegistry.outputs.name
     containerName: 'agentbackend'
     env: [
+      { name: 'ConnectionStrings__personalfinancedb', secretRef: 'sql-connection-string' }
       { name: 'DocumentIntelligence__Endpoint', value: documentIntelligence.outputs.endpoint }
       { name: 'DocumentIntelligence__ApiKey', secretRef: 'di-api-key' }
       { name: 'AzureOpenAI__Endpoint', value: aiFoundry.outputs.aiServicesEndpoint }
@@ -206,8 +219,10 @@ module agentBackend './modules/container-app.bicep' = {
       { name: 'services__accountapi__https__0', value: 'https://${accountApi.outputs.fqdn}' }
       { name: 'services__transactionapi__https__0', value: 'https://${transactionApi.outputs.fqdn}' }
       { name: 'services__paymentapi__https__0', value: 'https://${paymentApi.outputs.fqdn}' }
+      { name: 'OTEL_EXPORTER_OTLP_ENDPOINT', value: 'http://aspire-dashboard:18889' }
     ]
     secrets: [
+      { name: 'sql-connection-string', value: sqlServer.outputs.connectionString }
       { name: 'di-api-key', value: documentIntelligence.outputs.key }
       { name: 'openai-api-key', value: aiFoundry.outputs.aiServicesKey }
     ]
@@ -228,6 +243,7 @@ module frontend './modules/container-app.bicep' = {
     targetPort: 8080
     env: [
       { name: 'BACKEND_URL', value: 'https://${agentBackend.outputs.fqdn}' }
+      { name: 'OTEL_EXPORTER_OTLP_ENDPOINT', value: 'http://aspire-dashboard:18889' }
     ]
   }
 }
@@ -245,3 +261,4 @@ output AI_FOUNDRY_HUB_ID string = aiFoundry.outputs.aiHubId
 output AI_FOUNDRY_PROJECT_ID string = aiFoundry.outputs.aiProjectId
 output SQL_SERVER_FQDN string = sqlServer.outputs.fqdn
 output FRONTEND_FQDN string = frontend.outputs.fqdn
+output ASPIRE_DASHBOARD_NAME string = aspireDashboard.outputs.name

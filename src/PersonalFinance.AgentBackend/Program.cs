@@ -9,6 +9,7 @@ using Microsoft.Agents.AI.Hosting;
 using Microsoft.Agents.AI.Hosting.AGUI.AspNetCore;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
+using Microsoft.Agents.AI.Workflows.Checkpointing;
 using PersonalFinance.AgentBackend;
 using PersonalFinance.AgentBackend.Agents;
 using PersonalFinance.AgentBackend.Hubs;
@@ -65,6 +66,7 @@ builder.Services.AddSingleton<IChatClient>(sp =>
         .GetChatClient(deployment)
         .AsIChatClient()
         .AsBuilder()
+        .Use(inner => new StoredCompletionsChatClient(inner))
         .UseFunctionInvocation()
         .Build();
 });
@@ -88,6 +90,15 @@ builder.Services.AddSingleton<DocumentIntelligenceClient?>(sp =>
 builder.Services.AddSingleton<PaymentEventBroadcaster>();
 builder.Services.AddSingleton<PersonalFinanceAgentFactory>();
 builder.Services.AddScoped<ChatOrchestrationService>();
+
+// Register SQL-backed checkpoint store
+builder.Services.AddSingleton<SqlCheckpointStore>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var connStr = config.GetConnectionString("personalfinancedb")
+        ?? throw new InvalidOperationException("ConnectionStrings:personalfinancedb is required");
+    return new SqlCheckpointStore(connStr);
+});
 
 // Register multi-agent handoff workflow (required for DevUI workflow diagram)
 const string agentKey = "PersonalFinanceAgent";
@@ -143,7 +154,10 @@ builder.AddWorkflow(agentKey, (sp, key) =>
 builder.AddAIAgent(agentKey, (sp, name) =>
 {
     var workflow = sp.GetRequiredKeyedService<Workflow>(agentKey);
-    return workflow.AsAIAgent(name: agentKey).CreateFixedAgent();
+    var checkpointStore = sp.GetRequiredService<SqlCheckpointStore>();
+    var checkpointManager = CheckpointManager.CreateJson(checkpointStore);
+    var execEnv = InProcessExecution.Default.WithCheckpointing(checkpointManager);
+    return workflow.AsAIAgent(name: agentKey, executionEnvironment: execEnv).CreateFixedAgent();
 });
 
 builder.Services.AddOpenAIResponses();
@@ -166,10 +180,7 @@ app.MapOpenAIConversations();
 var personalFinanceAgent = app.Services.GetRequiredKeyedService<AIAgent>(agentKey);
 app.MapAGUI(pattern: "ag-ui", aiAgent: personalFinanceAgent);
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapDevUI();
-}
+app.MapDevUI();
 
 // File upload endpoint for invoice / receipt attachments
 app.MapPost("/api/attachments/upload", async (IFormFile file, IFileStorageService storage) =>

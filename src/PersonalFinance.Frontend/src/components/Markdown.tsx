@@ -11,8 +11,8 @@ export default function Markdown({ content, className }: MarkdownProps) {
   return (
     <div
       className={cn(
-        'prose prose-sm prose-invert max-w-none',
-        'prose-p:leading-relaxed prose-p:my-2 prose-p:first:mt-0 prose-p:last:mb-0',
+        'prose prose-sm max-w-none',
+        'prose-p:text-[var(--color-text)] prose-p:leading-relaxed prose-p:my-2 prose-p:first:mt-0 prose-p:last:mb-0',
         'prose-pre:bg-[var(--color-surface)] prose-pre:text-[var(--color-text)] prose-pre:border prose-pre:border-[var(--color-border)] prose-pre:rounded-lg',
         'prose-code:bg-[var(--color-surface)] prose-code:text-[var(--color-text)] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none',
         'prose-strong:text-[var(--color-text)] prose-strong:font-semibold',

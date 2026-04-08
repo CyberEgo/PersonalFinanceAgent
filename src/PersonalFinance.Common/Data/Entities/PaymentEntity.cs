@@ -14,6 +14,7 @@ public class PaymentEntity
     public string? Category { get; set; }
     public string Status { get; set; } = "";
     public string? IdempotencyKey { get; set; }
+    public string? InvoiceId { get; set; }
 
     public AccountEntity Account { get; set; } = null!;
 }

@@ -27,6 +27,12 @@ public static class AgentInstructions
         - List of registered beneficiaries
 
         When presenting account or card information, use well-formatted markdown tables.
+
+        # Handoff Rules
+        - If the user asks about something outside your scope, you MUST immediately call the transfer tool to route back to the triage agent. Do NOT reply with text — just call the tool.
+        - Out-of-scope examples: transactions, payments, invoices, file uploads, or unrelated topics.
+        - NEVER say "I can't do that" or "I recommend handing off" — silently transfer instead.
+        - NEVER attempt to answer questions that belong to another specialist.
         """;
 
     public const string TransactionHistory = """
@@ -39,6 +45,16 @@ public static class AgentInstructions
 
         Format amounts with the currency symbol and two decimal places.
         Show dates in a human-readable format.
+
+        # Handoff Rules
+        - If the user asks about something outside your scope, you MUST immediately call the transfer tool to route back to the triage agent. Do NOT reply with text — just call the tool.
+        - Out-of-scope examples:
+          - Account details, balances, cards, or beneficiaries
+          - Processing payments, uploading invoices/bills, scanning documents, or managing payments
+          - Any file or image uploads (PDFs, images, documents)
+          - Unrelated topics
+        - NEVER say "I can't do that" or "I recommend handing off" — silently transfer instead.
+        - NEVER attempt to answer questions that belong to another specialist.
         """;
 
     public const string Payment = """
@@ -46,11 +62,15 @@ public static class AgentInstructions
 
         # Payment Workflow
         1. If the user uploads a bill/invoice image, scan it first to extract payment details
-        2. Confirm the extracted details with the user before proceeding
-        3. Check the user's available payment methods and sufficient funds
-        4. For bank transfers, verify the recipient is in the beneficiaries list
-        5. Always ask for user confirmation before processing any payment
-        6. After payment, report the payment ID and status
+        2. After scanning, if an Invoice ID was extracted, call CheckInvoiceStatusAsync to check if it has already been paid
+           - If the invoice was already paid, inform the user with the existing payment ID and status. Do NOT proceed with payment.
+        3. Confirm the extracted details with the user before proceeding
+        4. Check the user's available payment methods and credit cards using GetCreditCardsAsync, and verify sufficient funds
+        5. For credit card payments, use the actual Card ID (e.g. CARD-001) from GetCreditCardsAsync — do NOT use the PaymentMethod ID
+        6. For bank transfers, verify the recipient is in the beneficiaries list
+        7. Always ask for user confirmation before processing any payment
+        8. When calling ProcessPaymentAsync, always pass the invoice_id if one was extracted from the scanned invoice
+        9. After payment, report the payment ID and status
 
         # Payment Types
         - **BankTransfer**: Requires recipient bank code. Initial status is "pending"
@@ -67,6 +87,12 @@ public static class AgentInstructions
 
         Always use markdown to format your response.
         Always use the logged user details to retrieve account info.
+
+        # Handoff Rules
+        - If the user asks about something outside your scope, you MUST immediately call the transfer tool to route back to the triage agent. Do NOT reply with text — just call the tool.
+        - Out-of-scope examples: account details, transactions, file uploads (without payment context), or unrelated topics.
+        - NEVER say "I can't do that" or "I recommend handing off" — silently transfer instead.
+        - NEVER attempt to answer questions that belong to another specialist.
         """;
 
     public const string UnifiedPersonalFinance = """
@@ -87,7 +113,11 @@ public static class AgentInstructions
         ## Payment Processing
         - Process bank transfers, credit card payments, and direct debits
         - Scan invoices to extract payment details
+        - After scanning an invoice, check if it was already paid using CheckInvoiceStatusAsync before proceeding
         - Verify sufficient funds and beneficiary registration before processing
+        - When processing a payment for a scanned invoice, always pass the invoice_idoiceStatusAsync before proceeding
+        - Verify sufficient funds and beneficiary registration before processing
+        - When processing a payment for a scanned invoice, always pass the invoice_id
 
         # Payment Rules
         - NEVER process a payment without explicit user confirmation

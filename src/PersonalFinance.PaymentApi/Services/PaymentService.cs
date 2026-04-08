@@ -9,6 +9,7 @@ public interface IPaymentService
 {
     Task<Payment> ProcessPaymentAsync(PaymentRequest request);
     Task<List<Payment>> GetPaymentsAsync();
+    Task<Payment?> GetPaymentByInvoiceIdAsync(string invoiceId);
 }
 
 public class PaymentService(PersonalFinanceDbContext db) : IPaymentService
@@ -34,7 +35,7 @@ public class PaymentService(PersonalFinanceDbContext db) : IPaymentService
                     await tx.RollbackAsync();
                     return new Payment(existing.Id, existing.AccountId, existing.Amount, existing.Description,
                         existing.Timestamp, existing.RecipientName, existing.RecipientBankCode,
-                        existing.PaymentType, existing.CardId, existing.Category, existing.Status);
+                        existing.PaymentType, existing.CardId, existing.Category, existing.Status, existing.InvoiceId);
                 }
             }
 
@@ -53,7 +54,7 @@ public class PaymentService(PersonalFinanceDbContext db) : IPaymentService
                 await tx.RollbackAsync();
                 return new Payment(duplicate.Id, duplicate.AccountId, duplicate.Amount, duplicate.Description,
                     duplicate.Timestamp, duplicate.RecipientName, duplicate.RecipientBankCode,
-                    duplicate.PaymentType, duplicate.CardId, duplicate.Category, duplicate.Status);
+                    duplicate.PaymentType, duplicate.CardId, duplicate.Category, duplicate.Status, duplicate.InvoiceId);
             }
 
             // --- 1. Generate next payment ID ---
@@ -89,7 +90,8 @@ public class PaymentService(PersonalFinanceDbContext db) : IPaymentService
                 CardId = request.CardId,
                 Category = request.Category,
                 Status = status,
-                IdempotencyKey = request.IdempotencyKey
+                IdempotencyKey = request.IdempotencyKey,
+                InvoiceId = request.InvoiceId
             };
             db.Payments.Add(entity);
 
@@ -180,13 +182,22 @@ public class PaymentService(PersonalFinanceDbContext db) : IPaymentService
             await tx.CommitAsync();
 
             return new Payment(entity.Id, entity.AccountId, entity.Amount, entity.Description, entity.Timestamp,
-                entity.RecipientName, entity.RecipientBankCode, entity.PaymentType, entity.CardId, entity.Category, entity.Status);
+                entity.RecipientName, entity.RecipientBankCode, entity.PaymentType, entity.CardId, entity.Category, entity.Status, entity.InvoiceId);
         });
     }
 
     public async Task<List<Payment>> GetPaymentsAsync()
         => await db.Payments
             .Select(p => new Payment(p.Id, p.AccountId, p.Amount, p.Description, p.Timestamp,
-                p.RecipientName, p.RecipientBankCode, p.PaymentType, p.CardId, p.Category, p.Status))
+                p.RecipientName, p.RecipientBankCode, p.PaymentType, p.CardId, p.Category, p.Status, p.InvoiceId))
             .ToListAsync();
+
+    public async Task<Payment?> GetPaymentByInvoiceIdAsync(string invoiceId)
+    {
+        var p = await db.Payments
+            .FirstOrDefaultAsync(p => p.InvoiceId == invoiceId);
+        if (p is null) return null;
+        return new Payment(p.Id, p.AccountId, p.Amount, p.Description, p.Timestamp,
+            p.RecipientName, p.RecipientBankCode, p.PaymentType, p.CardId, p.Category, p.Status, p.InvoiceId);
+    }
 }

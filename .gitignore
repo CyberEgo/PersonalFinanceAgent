@@ -32,3 +32,6 @@ Thumbs.db
 
 # Build
 publish/
+
+# Playwright MCP
+.playwright-mcp/
