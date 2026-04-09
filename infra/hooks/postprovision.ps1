@@ -7,12 +7,14 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "Retrieving Document Intelligence API key..." -ForegroundColor Cyan
 
-$resourceGroup = azd env get-value DOCUMENT_INTELLIGENCE_RESOURCE_GROUP
-$resourceName  = azd env get-value DOCUMENT_INTELLIGENCE_NAME
+$subscriptionId = azd env get-value AZURE_SUBSCRIPTION_ID
+$resourceGroup  = azd env get-value DOCUMENT_INTELLIGENCE_RESOURCE_GROUP
+$resourceName   = azd env get-value DOCUMENT_INTELLIGENCE_NAME
 
 $key = az cognitiveservices account keys list `
     --name $resourceName `
     --resource-group $resourceGroup `
+    --subscription $subscriptionId `
     --query "key1" -o tsv
 
 if ($LASTEXITCODE -ne 0) {

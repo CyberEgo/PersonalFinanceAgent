@@ -8,12 +8,6 @@
     "location": {
       "value": "${AZURE_LOCATION}"
     },
-    "projectName": {
-      "value": "${AZURE_PROJECT_NAME}"
-    },
-    "openAiLocation": {
-      "value": "${AZURE_OPENAI_LOCATION}"
-    },
     "sqlAdminPassword": {
       "value": "${AZURE_SQL_ADMIN_PASSWORD}"
     }

@@ -61,10 +61,13 @@ module documentIntelligence './modules/cognitive-services.bicep' = {
   }
 }
 
-// Azure AI Foundry (Hub + Project + AI Services)
-module aiFoundry './modules/ai-foundry.bicep' = {
-  name: 'ai-foundry'
+// Azure AI Services (CognitiveServices account + model deployment)
+// Created separately from AI Foundry Hub to ensure the RP reaches terminal state
+// before the Hub/Connection/Project resources try to interact with it.
+module aiServices './modules/ai-services.bicep' = {
+  name: 'ai-services'
   scope: rg
+  dependsOn: [documentIntelligence] // Both create CognitiveServices accounts; avoid RP conflict
   params: {
     name: '${abbrs.aiFoundry}${resourceToken}'
     location: openAiLocation
@@ -72,6 +75,20 @@ module aiFoundry './modules/ai-foundry.bicep' = {
     deploymentName: openAiDeploymentName
     modelName: openAiModelName
     modelVersion: openAiModelVersion
+  }
+}
+
+// Azure AI Foundry (Hub + Project + AI Services Connection)
+module aiFoundry './modules/ai-foundry.bicep' = {
+  name: 'ai-foundry'
+  scope: rg
+  params: {
+    name: '${abbrs.aiFoundry}${resourceToken}'
+    location: openAiLocation
+    tags: tags
+    aiServicesId: aiServices.outputs.aiServicesId
+    aiServicesEndpoint: aiServices.outputs.aiServicesEndpoint
+    aiServicesKey: aiServices.outputs.aiServicesKey
   }
 }
 
@@ -213,7 +230,7 @@ module agentBackend './modules/container-app.bicep' = {
       { name: 'ConnectionStrings__personalfinancedb', secretRef: 'sql-connection-string' }
       { name: 'DocumentIntelligence__Endpoint', value: documentIntelligence.outputs.endpoint }
       { name: 'DocumentIntelligence__ApiKey', secretRef: 'di-api-key' }
-      { name: 'AzureOpenAI__Endpoint', value: aiFoundry.outputs.aiServicesEndpoint }
+      { name: 'AzureOpenAI__Endpoint', value: aiServices.outputs.aiServicesEndpoint }
       { name: 'AzureOpenAI__ApiKey', secretRef: 'openai-api-key' }
       { name: 'AzureOpenAI__DeploymentName', value: openAiDeploymentName }
       { name: 'services__accountapi__https__0', value: 'https://${accountApi.outputs.fqdn}' }
@@ -224,7 +241,7 @@ module agentBackend './modules/container-app.bicep' = {
     secrets: [
       { name: 'sql-connection-string', value: sqlServer.outputs.connectionString }
       { name: 'di-api-key', value: documentIntelligence.outputs.key }
-      { name: 'openai-api-key', value: aiFoundry.outputs.aiServicesKey }
+      { name: 'openai-api-key', value: aiServices.outputs.aiServicesKey }
     ]
   }
 }
@@ -255,8 +272,8 @@ output DOCUMENT_INTELLIGENCE_RESOURCE_GROUP string = rg.name
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerRegistry.outputs.loginServer
 output AZURE_CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
 output AZURE_CONTAINER_APPS_ENVIRONMENT_ID string = containerAppsEnvironment.outputs.id
-output AZURE_OPENAI_ENDPOINT string = aiFoundry.outputs.aiServicesEndpoint
-output AZURE_OPENAI_DEPLOYMENT_NAME string = aiFoundry.outputs.deploymentName
+output AZURE_OPENAI_ENDPOINT string = aiServices.outputs.aiServicesEndpoint
+output AZURE_OPENAI_DEPLOYMENT_NAME string = aiServices.outputs.deploymentName
 output AI_FOUNDRY_HUB_ID string = aiFoundry.outputs.aiHubId
 output AI_FOUNDRY_PROJECT_ID string = aiFoundry.outputs.aiProjectId
 output SQL_SERVER_FQDN string = sqlServer.outputs.fqdn

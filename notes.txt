@@ -1,0 +1,44 @@
+Upload one invoice. 
+
+Ask to pay with Visa card. 
+
+Confirm the payment. 
+
+-----------------------------
+
+Police last three transactions. 
+
+
+-----------------------------
+
+demo the devui
+
+-----------------------------
+
+demo the stored completions
+
+-----------------------------
+
+Demo .NET Aspire
+
+=============================
+
+Hashtags, articles, and things like that.
+
+David Fowler (about .NET Aspire), article from the interview agent, try to summarize some points based on the marcus of agent framework documentation. 
+
+And the fact that the first version has been released 
+
+
+
+----------------------------
+
+https://www.linkedin.com/posts/renatosgribeiro_ai-maf-agentframework-share-7447654598946775040-0SuD?utm_source=share&utm_medium=member_desktop&rcm=ACoAAA6Ti1IB0x2ENjEd6gNBZxTBmOjc_NefC9Y
+
+https://devblogs.microsoft.com/agent-framework/ag-ui-multi-agent-workflow-demo/
+
+
+
+
+
+
